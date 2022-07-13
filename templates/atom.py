@@ -11,14 +11,43 @@ def generate_config(context):
     region = context.properties['region']
     deployment = context.env['deployment']
     instance_template = deployment + '-it'
-    igm = deployment + '-igm'
+    igm = deployment + '-igm'         
     bucketname = deployment + '-bucket'
+
     if context.properties['boomiAuthenticationType'].upper()=="TOKEN" :
         boomiUserEmailID= "BOOMI_TOKEN." +context.properties['boomiUserEmailID']
     else : 
         boomiUserEmailID= context.properties['boomiUserEmailID']  
     
     resources = []
+    resources.append(
+       {
+            'name': 'CreateBucket',
+            'type': 'gcp-types/storage-v1:buckets',
+            'properties':
+                {
+                   "name" : bucketname,
+                   "locationtype" : "Region",
+                   "location" : region,                  
+                   "storageClass" : "Standard"                                                          
+                                                                    
+                }
+        }
+
+    )   
+    resources.append(
+            {
+            'name': 'Cloudbuild',
+            'type': 'cloudbuild.jinja',
+            'properties': 
+                  {
+                    'bucketname' : bucketname
+
+                  },
+            'metadata': {      'dependsOn': ['CreateBucket']
+                     }
+            }
+        )
     resources.append(
        {
             'name': 'createfunction',
@@ -35,7 +64,9 @@ def generate_config(context):
                     'availableMemoryMb': 256 ,
                     'runtime': 'python37'
                                                       
-                }
+                },
+            'metadata': { 'dependsOn': [deployment+'-cloudbuild']
+                     }
         }
 
     )
@@ -46,7 +77,7 @@ def generate_config(context):
                 {
                  'name':"projects/"+context.properties.get('project', context.env['project'])+"/locations/" +context.properties['region']+"/functions/"+name +"licensevalidation",
 
-                 'data': '{"BoomiUsername":"'+boomiUserEmailID+'","boomiAuthenticationType":"'+context.properties['boomiAuthenticationType']+'","BoomiPassword":"'+context.properties['boomiPassword']+'","BoomiAccountID":"'+context.properties['boomiAccountID']+'","TokenType":"atom","TokenTimeout":"60", "bucketname": '+bucketname+'}'
+                 'data': '{"BoomiUsername":"'+boomiUserEmailID+'","boomiAuthenticationType":"'+context.properties['boomiAuthenticationType']+'","BoomiPassword":"'+context.properties['boomiPassword']+'","BoomiAccountID":"'+context.properties['boomiAccountID']+'","TokenType":"atom","TokenTimeout":"60", "bucketname": "'+bucketname+'"}'
 
                 },
 
