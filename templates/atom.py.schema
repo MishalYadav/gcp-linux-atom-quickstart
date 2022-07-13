@@ -11,3 +11,6 @@ info:
 
 imports:
   - path: cloudbuild.jinja
+
+  - name: cloudbuild.jinja
+    path: cloudbuild.jinja
