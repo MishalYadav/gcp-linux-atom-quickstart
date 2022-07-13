@@ -48,9 +48,8 @@ def auth_and_licensing_logic(username, password, account_id, token_type, token_t
 
 
 def handler(request):
-    STATUS = "SUCCESS"
-    atom_token = None
-    try:
+        STATUS = "SUCCESS"
+        atom_token = None    
         request_json = request.get_json()
         BoomiUsername = request_json['BoomiUsername']
         BoomiAuthenticationType= request_json['boomiAuthenticationType']
@@ -66,11 +65,5 @@ def handler(request):
          bucket = client.get_bucket(bucketname)
          blob = bucket.blob('token.txt')
          blob.upload_from_string(atom_token)
-    except requests.exceptions.RequestException as err:
-        logging.error(err)
-        STATUS = "FAILED"
-    except Exception as err:
-        logging.error(err)
-        STATUS = "FAILED"
-    finally:
-        print("status:{},token:{}".format(STATUS,atom_token))
+    
+        print("token:{}".format(atom_token))
