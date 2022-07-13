@@ -51,14 +51,6 @@ resources:
           - "serviceAccount:$(ref.{{ deployment }}-sa.email)"
 
 
-
-- name: {{ deployment }}-bucket
-  type: bucket.py
-  properties :
-    location : {{ region }}
-
-
-
 - name: {{ deployment }}-network
   type: network.py
   properties:
