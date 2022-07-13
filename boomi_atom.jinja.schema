@@ -13,9 +13,6 @@ imports:
 - name: iam.py
   path: templates/iam.py
 
-- name: bucket.py
-  path: templates/bucket.py
-
 - name: enableapis.py
   path: templates/enableapis.py
 
