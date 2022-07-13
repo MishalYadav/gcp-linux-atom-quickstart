@@ -1,29 +1,68 @@
 # Copyright 2020 Dell Boomi. All rights reserved.
 
-""" This template creates an IAM policy member. """
-
+""" This template creates a network, optionally with subnetworks. """
 
 def generate_config(context):
     """ Entry point for the deployment resources. """
 
-    project_id = context.properties.get('projectId', context.env['project'])
+    deployment = context.env['deployment']
+    name = context.properties.get('name') or context.env['name']
+    network_self_link = '$(ref.{}.selfLink)'.format(name)
+    auto_create_subnetworks = context.properties.get('autoCreateSubnetworks',False)
+    
 
-    resources = []
-    for ii, role in  enumerate(context.properties['roles']):
-        for i, member in enumerate(role['members']):
-            policy_get_name = 'get-iam-policy-{}-{}-{}'.format(context.env['name'], ii, i)
-
-            resources.append(
+    resources = [
+        {
+            'type': 'compute.v1.network',
+            'name': name,
+            'properties':
                 {
-                    'name': policy_get_name,
-                    'type': 'gcp-types/cloudresourcemanager-v1:virtual.projects.iamMemberBinding',
-                    'properties':
-                    {
-                        'resource': project_id,
-                        'role': role['role'],
-                        'member': member
-                    }
+                    'name': name,
+                    'autoCreateSubnetworks': auto_create_subnetworks
                 }
-            )
+        }
+        
+    ]
 
-    return {"resources": resources}
+    # Subnetworks:
+    out = {}
+    for subnetwork in context.properties.get('subnetworks', []):
+        subnetwork['network'] = network_self_link
+        resources.append(
+            {
+                'name': subnetwork['name'],
+                'type': 'subnetwork.py',
+                'properties': subnetwork
+            }
+        )
+
+        out[subnetwork['name']] = {
+            'selfLink': '$(ref.{}.selfLink)'.format(subnetwork['name']),
+            'ipCidrRange': '$(ref.{}.ipCidrRange)'.format(subnetwork['name']),
+            'region': '$(ref.{}.region)'.format(subnetwork['name']),
+            'network': '$(ref.{}.network)'.format(subnetwork['name']),
+            'gatewayAddress': '$(ref.{}.gatewayAddress)'.format(
+                subnetwork['name']
+            )
+        }
+
+    return {
+        'resources':
+            resources,
+        'outputs':
+            [
+                {
+                    'name': 'vpcName',
+                    'value': name
+                },
+                {
+                    'name': 'selfLink',
+                    'value': network_self_link
+                },
+                {
+                    'name': 'subnetworks',
+                    'value': out
+                }
+                
+            ]
+    }
