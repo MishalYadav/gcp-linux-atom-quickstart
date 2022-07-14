@@ -19,22 +19,14 @@ resources:
       - 'https://github.com/OfficialBoomi/gcp-linux-atom-quickstart.git'
       - quick_start 
     
-    - id: install_zip
-      name: 'gcr.io/cloud-builders/gsutil'
-      entrypoint: 'bash'
-      args:
-        - -c       
-        -  apt-get install zip -y     
-      waitFor: [git_clone]
-    
-    - id: create_zip
+     - id: create_zip
       name: 'gcr.io/cloud-builders/gsutil'
       entrypoint: 'bash'
       args:
         - -c
         - zip License_validation.zip main.py requirements.txt
       dir: quick_start/scripts
-      waitFor: [install_zip]
+      waitFor: [git_clone]
     
     - id: copy_to_bucket
       name: 'gcr.io/cloud-builders/gsutil'
