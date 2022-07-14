@@ -30,6 +30,10 @@ resources:
         serviceName: cloudfunctions.googleapis.com     
       - name: computeApi
         serviceName: compute.googleapis.com
+      - name: deploymentmanagerApi
+        serviceName: deploymentmanager.googleapis.com
+      - name: cloudbuildApi
+        serviceName: cloudbuild.googleapis.com
         
 - name: {{ deployment }}-sa
   type: iam.v1.serviceAccount
@@ -161,9 +165,9 @@ resources:
       then
         TOKEN="$(gsutil cat gs://{{ deployment }}-bucket/token.txt | head -1)"
         gsutil rm gs://{{ deployment }}-bucket/token.txt
-        sudo /usr/local/boomi/atom_install64.sh -q console -VinstallToken="${TOKEN}" -VatomName={{AtomName}} -VaccountId={{boomiAccountID}} -dir "/opt/boomi/"
+        sudo /usr/local/boomi/atom_install64.sh -q console -VinstallToken="${TOKEN}" -VatomName={{AtomName}} -VaccountId={{boomiAccountID}} -dir "/opt/boomi/"        
       else
-        sudo /usr/local/boomi/atom_install64.sh -q console -Vusername={{boomiUserEmailID}} -Vpassword={{boomiPassword}} -VatomName={{AtomName}} -VaccountId={{boomiAccountID}} -dir "/opt/boomi/"
+        sudo /usr/local/boomi/atom_install64.sh -q console -Vusername={{boomiUserEmailID}} -Vpassword={{boomiPassword}} -VatomName={{AtomName}} -VaccountId={{boomiAccountID}} -dir "/opt/boomi/"        
       fi
 
 
